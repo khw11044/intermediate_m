@@ -1,3 +1,10 @@
+### Langchain과 Whisper를 이용한 유튜브 뉴스 영상에서 컨텐츠 기사 만들기 
+
+내 데모 페이지 
+
+https://newvideosummary.streamlit.app/
+
+
 
 ![image](https://github.com/khw11044/intermediate_m/assets/51473705/14f7e642-71bd-461e-9990-8a3d3070ce08)
 
