@@ -43,8 +43,8 @@ def summarize_text(text):
 def main():
     st.title("YouTube 뉴스 오디오 추출 및 요약 서비스")
 
-    youtube_url = st.text_input(f"<a href='https://www.youtube.com/watch?v=4EzXnCfB5oU' style='font-size:14px;'>YouTube 뉴스 링크를 입력하세요: 예시) https://www.youtube.com/watch?v=4EzXnCfB5oU</a>")
-
+    youtube_url = st.text_input("YouTube 뉴스 링크를 입력하세요:")
+    
     if st.button("오디오 파일 다운로드"):
         with st.spinner("오디오 파일을 다운로드 중..."):
             audio_path = download_audio(youtube_url)
