@@ -65,6 +65,7 @@ def main():
             message_placeholder = st.empty()
             for chunk in transcription.split(" "):
                 full_response += chunk + " "
+
                 message_placeholder.markdown(full_response + "▌")
                 message_placeholder.markdown(full_response)
         
@@ -75,15 +76,6 @@ def main():
                 st.success("텍스트 요약이 완료되었습니다.")
                 st.write("요약 결과:")
                 st.write(summary)
-                
-            with open(audio_path, "rb") as file:
-                file_name = os.path.basename(audio_path)
-                btn = st.download_button(
-                    label="오디오 파일 다운로드",
-                    data=file,
-                    file_name=file_name,
-                    mime="audio/mp4"
-                )
 
             # 사용 후 파일 삭제
             if os.path.exists(st.session_state.audio_path):
