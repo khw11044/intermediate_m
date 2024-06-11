@@ -16,10 +16,10 @@ whispermodel = whisper.load_model("base")
 from dotenv import load_dotenv
 load_dotenv()
 import openai
-# os.environ["OPENAI_API_KEY"] = st.secrets["OPENAI_API_KEY"]
-# os.environ["TAVILY_API_KEY"] = st.secrets["TAVILY_API_KEY"]
+os.environ["OPENAI_API_KEY"] = st.secrets["OPENAI_API_KEY"]
+os.environ["TAVILY_API_KEY"] = st.secrets["TAVILY_API_KEY"]
 
-openai.api_key=os.getenv("OPENAI_API_KEY")
+# openai.api_key=os.getenv("OPENAI_API_KEY")
 # openai.api_key= os.environ.get("OPENAI_API_KEY")
 
 # conda install -c conda-forge ffmpeg
