@@ -21,6 +21,8 @@ def download_audio(youtube_url):
     out_file = stream.download(output_path=os.path.expanduser('~/Downloads'))
     base, ext = os.path.splitext(out_file)
     audio_file = base + '.mp3'
+    if os.path.exists(audio_file):
+        os.remove(audio_file)  # 기존 파일이 존재하면 삭제
     os.rename(out_file, audio_file)
     return audio_file
 
@@ -40,14 +42,14 @@ def summarize_text(text):
     return summary.content
 
 def main():
-    st.title("YouTube 뉴스 오디오 추출 및 요약 서비스")
-
-    st.markdown(f"<a href='https://www.youtube.com/watch?v=4EzXnCfB5oU' style='font-size:14px;'>YouTube 뉴스 링크를 입력하세요: 예시) https://www.youtube.com/watch?v=4EzXnCfB5oU</a>", unsafe_allow_html=True)
+    st.title("현우의 YouTube 뉴스 오디오 추출 및 요약 서비스")
 
     youtube_url = st.text_input("YouTube 뉴스 링크를 입력하세요:")
+    st.markdown(f"<a href='https://www.youtube.com/watch?v=4EzXnCfB5oU' style='font-size:14px;'>예시) https://www.youtube.com/watch?v=4EzXnCfB5oU</a>", unsafe_allow_html=True)
 
     if st.button("오디오 파일 다운로드"):
         with st.spinner("오디오 파일을 다운로드 중..."):
+            
             audio_path = download_audio(youtube_url)
             st.success(f"오디오 파일이 다운로드되었습니다: {audio_path}")
             st.session_state.audio_path = audio_path
@@ -66,5 +68,10 @@ def main():
                 st.write("요약 결과:")
                 st.write(summary)
 
+            # 사용 후 파일 삭제
+            if os.path.exists(st.session_state.audio_path):
+                os.remove(st.session_state.audio_path)
+                del st.session_state.audio_path
+    
 if __name__ == "__main__":
     main()
