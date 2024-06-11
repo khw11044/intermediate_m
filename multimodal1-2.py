@@ -39,49 +39,58 @@ def summarize_text(text):
     summary = chain.invoke({"transcript": docs})
     return summary.content
 
+from pytube import YouTube
+from pathlib import Path
+# 유튜브 링크에서 오디오 파일을 다운로드하는 함수
+def download_audio_from_youtube(url, output_dir):
+    yt = YouTube(url)
+    audio_stream = yt.streams.filter(only_audio=True).first()
+    file_path = audio_stream.download(output_path=output_dir)
+    file_name = "download_file.mp4"
+    # 파일을 다운로드할 수 있는 링크 제공
+    with open(file_path, "rb") as file:
+        btn = st.download_button(
+            label="오디오 파일 다운로드",
+            data=file,
+            file_name=file_name,
+            mime="audio/mp4"
+        )
+    return file_path
+
+# 업로드된 파일을 저장하는 함수
+def save_uploaded_file(uploaded_file, directory):
+    if not os.path.exists(directory):
+        os.makedirs(directory)
+    file_path = os.path.join(directory, uploaded_file.name)
+    with open(file_path, "wb") as f:
+        f.write(uploaded_file.getbuffer())
+    return file_path
+
 # Streamlit app
 st.title("유튜브 뉴스 영상 SEO 컨텐츠 기사로 만들기")
 st.write("음성 파일을 업로드하면 기사글을 작성해줍니다.")
 
-from pytube import YouTube
-from pathlib import Path
 
 st.markdown(f"<a href='https://www.youtube.com/watch?v=4EzXnCfB5oU' style='font-size:14px;'>예시: https://www.youtube.com/watch?v=4EzXnCfB5oU</a>", unsafe_allow_html=True)
 address = st.text_input('유튜브 주소를 입력하고 엔터를 눌러주세요.')
 if address:
     try:
-        # 임시 디렉토리에 파일 다운로드
-        with tempfile.TemporaryDirectory() as tmpdirname:
-            yt = YouTube(address)
-            audio_stream = yt.streams.filter(only_audio=True).first()
-            file_path = audio_stream.download(output_path=tmpdirname)
-            # file_name = file_path.split('\\')[-1] # os.path.basename(file_path)
-            file_name = "download_file.mp4"
-            st.markdown(f"<p>file_path : {file_path}</a>", unsafe_allow_html=True)
-            st.markdown(f"<p>file_name : {file_name}</a>", unsafe_allow_html=True)
-            st.success("오디오 파일이 다운로드되었습니다.")
-            # 파일을 다운로드할 수 있는 링크 제공
-            with open(file_path, "rb") as file:
-                btn = st.download_button(
-                    label="오디오 파일 다운로드",
-                    data=file,
-                    file_name=file_name,
-                    mime="audio/mp4"
-                )
+        download_path = 'downloads'
+        file_path = download_audio_from_youtube(address, download_path)
+        st.success(f"오디오 파일이 다운로드되었습니다: {file_path}")
+        st.markdown(f"[여기를 클릭하여 다운로드된 파일 확인](./{file_path})")
     except Exception as e:
         st.error(f"오디오 파일을 다운로드하는 중 오류가 발생했습니다: {e}")
 
 audio_file = st.file_uploader("다운로드 폴더에 다운받은 오디오파일을 업로드해주세요.", type=["wav", "mp3", "mp4","m4a"])
 
 if audio_file is not None:
-    with tempfile.NamedTemporaryFile(delete=False) as temp_file:
-        temp_file.write(audio_file.read())
-        temp_file_path = temp_file.name
-
-    st.markdown(f"<p>temp_file : {temp_file}</a>", unsafe_allow_html=True)
-    st.markdown(f"<p>temp_file_path : {temp_file_path}</a>", unsafe_allow_html=True)
-    st.audio(temp_file_path, format="audio/wav")
-    transcription = transcribe_audio(temp_file_path)
+    upload_directory = 'uploaded_files'
+    file_path = save_uploaded_file(audio_file, upload_directory)
+    st.success(f"파일이 저장되었습니다: {file_path}")
+    st.audio(file_path, format="audio/wav")
+    
+    transcription = transcribe_audio(file_path)
     st.subheader("Transcription")
     full_response = ""
     message_placeholder = st.empty()
@@ -95,4 +104,4 @@ if audio_file is not None:
     st.subheader("Summary")
     st.write(summary)
 
-    os.remove(temp_file_path)
+    # os.remove(temp_file_path)
