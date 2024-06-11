@@ -56,7 +56,7 @@ if address:
             audio_stream = yt.streams.filter(only_audio=True).first()
             file_path = audio_stream.download(output_path=tmpdirname)
             # file_name = file_path.split('\\')[-1] # os.path.basename(file_path)
-            file_name = "download_file.mp3"
+            file_name = "download_file.mp4"
             st.markdown(f"<p>file_path : {file_path}</a>", unsafe_allow_html=True)
             st.markdown(f"<p>file_name : {file_name}</a>", unsafe_allow_html=True)
             st.success("오디오 파일이 다운로드되었습니다.")
