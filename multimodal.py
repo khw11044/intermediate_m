@@ -37,19 +37,34 @@ def summarize_text(text):
     summary = chain.invoke({"transcript": docs})
     return summary.content
 
+def get_download_folder():
+    if os.name == 'nt':
+        import winreg
+        sub_key = r'SOFTWARE\Microsoft\Windows\CurrentVersion\Explorer\Shell Folders'
+        downloads_guid = '{374DE290-123F-4565-9164-39C4925E467B}'
+        with winreg.OpenKey(winreg.HKEY_CURRENT_USER, sub_key) as key:
+            location = winreg.QueryValueEx(key, downloads_guid)[0]
+        return location
+    else:
+        return str(Path.home() / "Downloads")
+
 # Streamlit app
 st.title("유튜브 뉴스 영상 SEO 컨텐츠 기사로 만들기")
 st.write("음성 파일을 업로드하면 기사글을 작성해줍니다.")
 
 # pip install pytube
 from pytube import YouTube
+from pathlib import Path
 address = st.text_input('유튜브 주소를 입력하고 엔터를 눌러주세요.')
 if address:
     st.markdown(f"<a href='{address}' style='font-size:14px;'>오디오 파일 다운로드중... : {address}</a>", unsafe_allow_html=True)
+    download_path = get_download_folder()
     yt = YouTube(address)
-    yt.streams.filter(only_audio=True).first().download()
+    yt.streams.filter(only_audio=True).first().download(download_path)
 
-audio_file = st.file_uploader("다운받은 오디오파일을 업로드해주세요.", type=["wav", "mp3", "mp4","m4a"])
+
+
+audio_file = st.file_uploader("다운로드 폴더에 다운받은 오디오파일을 업로드해주세요.", type=["wav", "mp3", "mp4","m4a"])
 
 if audio_file is not None:
     with tempfile.NamedTemporaryFile(delete=False) as temp_file:
