@@ -71,19 +71,18 @@ def main():
                 message_placeholder.markdown(full_response)
 
 
-    if "transcription" in st.session_state:
-        if st.button("요약하기"):
-            
-            with st.spinner("텍스트를 요약 중..."):
-                summary = summarize_text(transcription)
-                st.success("텍스트 요약이 완료되었습니다.")
-                st.subheader("요약 결과:")
-                st.write(summary)
+            if st.button("요약하기"):
                 
-                # 사용 후 파일 삭제
-            if os.path.exists(st.session_state.audio_path):
-                os.remove(st.session_state.audio_path)
-                del st.session_state.audio_path
+                with st.spinner("텍스트를 요약 중..."):
+                    summary = summarize_text(transcription)
+                    st.success("텍스트 요약이 완료되었습니다.")
+                    st.subheader("요약 결과:")
+                    st.write(summary)
+                    
+                    # 사용 후 파일 삭제
+                if os.path.exists(st.session_state.audio_path):
+                    os.remove(st.session_state.audio_path)
+                    del st.session_state.audio_path
 
             
     
