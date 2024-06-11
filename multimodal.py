@@ -46,7 +46,7 @@ def main():
     st.title("현우의 YouTube 뉴스 오디오 추출 및 요약 서비스")
 
     youtube_url = st.text_input("YouTube 뉴스 링크를 입력하세요:")
-    st.markdown(f"<a href='https://www.youtube.com/watch?v=4EzXnCfB5oU' style='font-size:14px;'>예시) https://www.youtube.com/watch?v=4EzXnCfB5oU</a>", unsafe_allow_html=True)
+    st.markdown(f"<a href='https://www.youtube.com/watch?v=4EzXnCfB5oU' style='font-size:14px;'>예시 링크) https://www.youtube.com/watch?v=4EzXnCfB5oU</a>", unsafe_allow_html=True)
 
     if st.button("오디오 파일 다운로드"):
         with st.spinner("오디오 파일을 다운로드 중..."):
@@ -58,16 +58,32 @@ def main():
     if "audio_path" in st.session_state:
         st.audio(st.session_state.audio_path, format='audio/mp3')
 
-        if st.button("오디오 파일을 업로드하여 요약"):
-            with st.spinner("오디오 파일을 텍스트로 변환 중..."):
-                text = transcribe_audio(st.session_state.audio_path)
-                st.success("오디오 파일이 텍스트로 변환되었습니다.")
-
+        with st.spinner("오디오 파일을 텍스트로 변환 중..."):
+            transcription = transcribe_audio(st.session_state.audio_path)
+            st.subheader("Transcription")
+            full_response = ""
+            message_placeholder = st.empty()
+            for chunk in transcription.split(" "):
+                full_response += chunk + " "
+                message_placeholder.markdown(full_response + "▌")
+                message_placeholder.markdown(full_response)
+        
+        if st.button("요약하기"):
+            
             with st.spinner("텍스트를 요약 중..."):
-                summary = summarize_text(text)
+                summary = summarize_text(transcription)
                 st.success("텍스트 요약이 완료되었습니다.")
                 st.write("요약 결과:")
                 st.write(summary)
+                
+            with open(audio_path, "rb") as file:
+                file_name = os.path.basename(audio_path)
+                btn = st.download_button(
+                    label="오디오 파일 다운로드",
+                    data=file,
+                    file_name=file_name,
+                    mime="audio/mp4"
+                )
 
             # 사용 후 파일 삭제
             if os.path.exists(st.session_state.audio_path):
