@@ -13,8 +13,7 @@ from langchain_core.prompts import PromptTemplate
 model = whisper.load_model("base")
 
 # # OpenAI API 키 설정
-os.environ["OPENAI_API_KEY"] = st.secrets["OPENAI_API_KEY"]
-os.environ["TAVILY_API_KEY"] = st.secrets["TAVILY_API_KEY"]
+# openai.api_key = 'YOUR_OPENAI_API_KEY'
 
 def download_audio(youtube_url):
     yt = YouTube(youtube_url)
