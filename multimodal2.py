@@ -9,8 +9,8 @@ from langchain import hub
 from langchain_core.prompts import PromptTemplate
 import whisper
 
-os.environ["OPENAI_API_KEY"] = st.secrets["OPENAI_API_KEY"]
-os.environ["TAVILY_API_KEY"] = st.secrets["TAVILY_API_KEY"]
+# os.environ["OPENAI_API_KEY"] = st.secrets["OPENAI_API_KEY"]
+# os.environ["TAVILY_API_KEY"] = st.secrets["TAVILY_API_KEY"]
 
 # openai.api_key=os.getenv("OPENAI_API_KEY")
 # openai.api_key= os.environ.get("OPENAI_API_KEY")
