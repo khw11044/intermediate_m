@@ -7,6 +7,7 @@ import os
 import time
 from langchain import hub
 from langchain_core.prompts import PromptTemplate
+from pathlib import Path
 
 # !pip install openai-whisper
 import whisper
@@ -38,15 +39,13 @@ def summarize_text(text):
     return summary.content
 
 def get_download_folder():
+    """사용자의 다운로드 폴더 경로를 반환합니다."""
     if os.name == 'nt':
-        import winreg
-        sub_key = r'SOFTWARE\Microsoft\Windows\CurrentVersion\Explorer\Shell Folders'
-        downloads_guid = '{374DE290-123F-4565-9164-39C4925E467B}'
-        with winreg.OpenKey(winreg.HKEY_CURRENT_USER, sub_key) as key:
-            location = winreg.QueryValueEx(key, downloads_guid)[0]
-        return location
+        from pathlib import Path
+        download_folder = str(Path.home() / "Downloads")
     else:
-        return str(Path.home() / "Downloads")
+        download_folder = str(Path.home() / "Downloads")
+    return download_folder
 
 # Streamlit app
 st.title("유튜브 뉴스 영상 SEO 컨텐츠 기사로 만들기")
@@ -59,9 +58,11 @@ address = st.text_input('유튜브 주소를 입력하고 엔터를 눌러주세
 if address:
     st.markdown(f"<a href='{address}' style='font-size:14px;'>오디오 파일 다운로드중... : {address}</a>", unsafe_allow_html=True)
     download_path = get_download_folder()
-    st.markdown(f"<p style='font-size:14px;'>다운로드 위치: {download_path}</p>", unsafe_allow_html=True)
     yt = YouTube(address)
-    yt.streams.filter(only_audio=True).first().download(download_path)
+    audio_stream = yt.streams.filter(only_audio=True).first()
+    file_path = audio_stream.download(download_path)
+    file_name = os.path.basename(file_path)
+    st.markdown(f"<p style='font-size:14px;'>다운로드 위치: {file_name}</p>", unsafe_allow_html=True)
 
 
 
@@ -72,7 +73,6 @@ if audio_file is not None:
         temp_file.write(audio_file.read())
         temp_file_path = temp_file.name
 
-    print('temp_file_path:',temp_file_path)
     st.audio(temp_file_path, format="audio/wav")
     transcription = transcribe_audio(temp_file_path)
     st.subheader("Transcription")
