@@ -16,13 +16,12 @@ whispermodel = whisper.load_model("base")
 from dotenv import load_dotenv
 load_dotenv()
 import openai
-os.environ["OPENAI_API_KEY"] = st.secrets["OPENAI_API_KEY"]
-os.environ["TAVILY_API_KEY"] = st.secrets["TAVILY_API_KEY"]
-# openai.api_key= os.environ.get("OPENAI_API_KEY")
+# os.environ["OPENAI_API_KEY"] = st.secrets["OPENAI_API_KEY"]
+# os.environ["TAVILY_API_KEY"] = st.secrets["TAVILY_API_KEY"]
+
 openai.api_key=os.getenv("OPENAI_API_KEY")
+# openai.api_key= os.environ.get("OPENAI_API_KEY")
 
-
-# pip install ffmpeg-python
 # conda install -c conda-forge ffmpeg
 def transcribe_audio(file_path):
     result = whispermodel.transcribe(file_path)     # 오류발생, 인터넷에 isper model FileNotFoundError: [WinError 2] 또는 ffmpeg 검색
@@ -42,11 +41,11 @@ def summarize_text(text):
 st.title("유튜브 뉴스 영상 SEO 컨텐츠 기사로 만들기")
 st.write("음성 파일을 업로드하면 기사글을 작성해줍니다.")
 
-# !pip install pytube
+# pip install pytube
 from pytube import YouTube
 address = st.text_input('유튜브 주소를 입력하고 엔터를 눌러주세요.')
 if address:
-    st.markdown(f"<a href='{address}' style='font-size:14px;'>해당 링크로 접속 : {address}</a>", unsafe_allow_html=True)
+    st.markdown(f"<a href='{address}' style='font-size:14px;'>오디오 파일 다운로드중... : {address}</a>", unsafe_allow_html=True)
     yt = YouTube(address)
     yt.streams.filter(only_audio=True).first().download()
 
