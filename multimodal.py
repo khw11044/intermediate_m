@@ -71,7 +71,7 @@ def main():
                 message_placeholder.markdown(full_response)
 
 
-    if "audio_path" in st.session_state:
+    if "transcription" in st.session_state:
         if st.button("요약하기"):
             
             with st.spinner("텍스트를 요약 중..."):
