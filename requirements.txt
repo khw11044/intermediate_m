@@ -86,6 +86,3 @@ tzdata==2024.1
 urllib3==2.2.1
 watchdog==4.0.1
 yarl==1.9.4
-ffmpeg-python
-ffmpeg-static
-python-ffmpeg
