@@ -8,16 +8,10 @@ import time
 from langchain import hub
 from langchain_core.prompts import PromptTemplate
 import whisper
+import ffmpeg  # 추가된 라이브러리
 
 os.environ["OPENAI_API_KEY"] = st.secrets["OPENAI_API_KEY"]
 os.environ["TAVILY_API_KEY"] = st.secrets["TAVILY_API_KEY"]
-
-# openai.api_key=os.getenv("OPENAI_API_KEY")
-# openai.api_key= os.environ.get("OPENAI_API_KEY")
-
-# FFmpeg 경로 설정 (필요시)
-os.environ["PATH"] += os.pathsep + '/usr/bin/ffmpeg'  # Linux 경로 예제
-# os.environ["PATH"] += os.pathsep + r"C:\path\to\ffmpeg\bin"  # Windows 경로 예제
 
 # Whisper 모델 로드
 whispermodel = whisper.load_model("base")
@@ -27,6 +21,10 @@ load_dotenv()
 import openai
 
 def transcribe_audio(file_path):
+    # FFmpeg 경로 설정
+    ffmpeg_path = ffmpeg.probe(file_path)  # FFmpeg 라이브러리를 사용하여 파일을 프로브
+    os.environ["PATH"] += os.pathsep + os.path.dirname(ffmpeg_path['format']['filename'])
+
     result = whispermodel.transcribe(file_path)
     return result['text']
 
