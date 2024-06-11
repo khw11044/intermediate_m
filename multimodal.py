@@ -9,6 +9,7 @@ from langchain.chains.summarize import load_summarize_chain
 from langchain import hub
 from langchain_core.prompts import PromptTemplate
 
+import time
 # Whisper 모델 불러오기
 model = whisper.load_model("base")
 
@@ -67,7 +68,7 @@ def main():
             message_placeholder = st.empty()
             for chunk in transcription.split(" "):
                 full_response += chunk + " "
-
+                time.sleep(0.1)
                 message_placeholder.markdown(full_response + "▌")
                 message_placeholder.markdown(full_response)
 
