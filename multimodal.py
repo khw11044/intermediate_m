@@ -1,32 +1,38 @@
+import os
 import streamlit as st
 from langchain_openai import ChatOpenAI
 from langchain.text_splitter import CharacterTextSplitter
-from langchain.chains.summarize import load_summarize_chain
-import tempfile
-import os
-import time
-from langchain import hub
 from langchain_core.prompts import PromptTemplate
-
-# !pip install openai-whisper
+from langchain import hub
+import yt_dlp
 import whisper
-whispermodel = whisper.load_model("base")
-
-
-from dotenv import load_dotenv
-load_dotenv()
 import openai
-os.environ["OPENAI_API_KEY"] = st.secrets["OPENAI_API_KEY"]
-os.environ["TAVILY_API_KEY"] = st.secrets["TAVILY_API_KEY"]
-# openai.api_key= os.environ.get("OPENAI_API_KEY")
-openai.api_key=os.getenv("OPENAI_API_KEY")
 
+# Whisper 모델 불러오기
+model = whisper.load_model("base")
 
-# pip install ffmpeg-python
-# conda install -c conda-forge ffmpeg
-def transcribe_audio(file_path):
-    result = whispermodel.transcribe(file_path)     # 오류발생, 인터넷에 isper model FileNotFoundError: [WinError 2] 또는 ffmpeg 검색
-    return result['text']
+# OpenAI API 키 설정
+openai.api_key= os.environ.get("OPENAI_API_KEY")
+
+def download_audio(youtube_url):
+    ydl_opts = {
+        'format': 'bestaudio/best',
+        'outtmpl': os.path.expanduser('~/Downloads/%(title)s.%(ext)s'),
+        'postprocessors': [{
+            'key': 'FFmpegExtractAudio',
+            'preferredcodec': 'mp3',
+            'preferredquality': '192',
+        }],
+    }
+    with yt_dlp.YoutubeDL(ydl_opts) as ydl:
+        info_dict = ydl.extract_info(youtube_url, download=True)
+        file_name = ydl.prepare_filename(info_dict)
+        audio_file = file_name.rsplit('.', 1)[0] + '.mp3'
+    return audio_file
+
+def transcribe_audio(audio_path):
+    result = model.transcribe(audio_path)
+    return result["text"]
 
 def summarize_text(text):
     llm = ChatOpenAI(model="gpt-3.5-turbo")            # gpt-4o
@@ -38,39 +44,38 @@ def summarize_text(text):
     summary = chain.invoke({"transcript": docs})
     return summary.content
 
-# Streamlit app
-st.title("유튜브 뉴스 영상 SEO 컨텐츠 기사로 만들기")
-st.write("음성 파일을 업로드하면 기사글을 작성해줍니다.")
+def main():
+    st.title("YouTube 뉴스 오디오 추출 및 요약 서비스")
 
-# !pip install pytube
-from pytube import YouTube
-address = st.text_input('유튜브 주소를 입력하고 엔터를 눌러주세요.')
-if address:
-    st.markdown(f"<a href='{address}' style='font-size:14px;'>해당 링크로 접속 : {address}</a>", unsafe_allow_html=True)
-    yt = YouTube(address)
-    yt.streams.filter(only_audio=True).first().download()
+    youtube_url = st.text_input("YouTube 뉴스 링크를 입력하세요:")
 
-audio_file = st.file_uploader("다운받은 오디오파일을 업로드해주세요.", type=["wav", "mp3", "mp4","m4a"])
+    if st.button("오디오 파일 다운로드"):
+        with st.spinner("오디오 파일을 다운로드 중..."):
+            audio_path = download_audio(youtube_url)
+            st.success(f"오디오 파일이 다운로드되었습니다: {audio_path}")
+            st.session_state.audio_path = audio_path
 
-if audio_file is not None:
-    with tempfile.NamedTemporaryFile(delete=False) as temp_file:
-        temp_file.write(audio_file.read())
-        temp_file_path = temp_file.name
+    if "audio_path" in st.session_state:
+        st.audio(st.session_state.audio_path, format='audio/mp3')
+        with st.spinner("오디오 파일을 업로드하여  텍스트로 변환 중..."):
+            transcription = transcribe_audio(st.session_state.audio_path)
+            st.success("오디오 파일이 텍스트로 변환되었습니다.")
+            st.subheader("Transcription")
+            full_response = ""
+            message_placeholder = st.empty()
+            for chunk in transcription.split(" "):
+                full_response += chunk + " "
+                # time.sleep(0.1)
+                message_placeholder.markdown(full_response + "▌")
+                message_placeholder.markdown(full_response)
 
-    print('temp_file_path:',temp_file_path)
-    st.audio(temp_file_path, format="audio/wav")
-    transcription = transcribe_audio(temp_file_path)
-    st.subheader("Transcription")
-    full_response = ""
-    message_placeholder = st.empty()
-    for chunk in transcription.split(" "):
-        full_response += chunk + " "
-        time.sleep(0.1)
-        message_placeholder.markdown(full_response + "▌")
-        message_placeholder.markdown(full_response)
+        if st.button("오디오 파일을 요약"):
 
-    summary = summarize_text(transcription)
-    st.subheader("Summary")
-    st.write(summary)
-        
-    os.remove(temp_file_path)
+            with st.spinner("텍스트를 요약 중..."):
+                summary = summarize_text(transcription)
+                st.success("텍스트 요약이 완료되었습니다.")
+                st.subheader("요약 결과:")
+                st.write(summary)
+
+if __name__ == "__main__":
+    main()
