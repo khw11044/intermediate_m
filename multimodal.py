@@ -12,9 +12,9 @@ from langchain_core.prompts import PromptTemplate
 # Whisper 모델 불러오기
 model = whisper.load_model("base")
 
-# # OpenAI API 키 설정
-os.environ["OPENAI_API_KEY"] = st.secrets["OPENAI_API_KEY"]
-os.environ["TAVILY_API_KEY"] = st.secrets["TAVILY_API_KEY"]
+# # # OpenAI API 키 설정
+# os.environ["OPENAI_API_KEY"] = st.secrets["OPENAI_API_KEY"]
+# os.environ["TAVILY_API_KEY"] = st.secrets["TAVILY_API_KEY"]
 
 def download_audio(youtube_url):
     yt = YouTube(youtube_url)
@@ -58,6 +58,7 @@ def main():
     if "audio_path" in st.session_state:
         st.audio(st.session_state.audio_path, format='audio/mp3')
 
+        
         with st.spinner("오디오 파일을 텍스트로 변환 중..."):
             transcription = transcribe_audio(st.session_state.audio_path)
             st.subheader("Transcription")
@@ -68,19 +69,23 @@ def main():
 
                 message_placeholder.markdown(full_response + "▌")
                 message_placeholder.markdown(full_response)
-        
+
+
+    if "audio_path" in st.session_state:
         if st.button("요약하기"):
             
             with st.spinner("텍스트를 요약 중..."):
                 summary = summarize_text(transcription)
                 st.success("텍스트 요약이 완료되었습니다.")
-                st.write("요약 결과:")
+                st.subheader("요약 결과:")
                 st.write(summary)
-
-            # 사용 후 파일 삭제
+                
+                # 사용 후 파일 삭제
             if os.path.exists(st.session_state.audio_path):
                 os.remove(st.session_state.audio_path)
                 del st.session_state.audio_path
+
+            
     
 if __name__ == "__main__":
     main()
