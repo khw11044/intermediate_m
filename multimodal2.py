@@ -9,8 +9,8 @@ from langchain import hub
 from langchain_core.prompts import PromptTemplate
 import whisper
 
-os.environ["OPENAI_API_KEY"] = st.secrets["OPENAI_API_KEY"]
-os.environ["TAVILY_API_KEY"] = st.secrets["TAVILY_API_KEY"]
+# os.environ["OPENAI_API_KEY"] = st.secrets["OPENAI_API_KEY"]
+# os.environ["TAVILY_API_KEY"] = st.secrets["TAVILY_API_KEY"]
 
 # openai.api_key=os.getenv("OPENAI_API_KEY")
 # openai.api_key= os.environ.get("OPENAI_API_KEY")
@@ -55,8 +55,10 @@ if address:
             yt = YouTube(address)
             audio_stream = yt.streams.filter(only_audio=True).first()
             file_path = audio_stream.download(output_path=tmpdirname)
-            file_name = os.path.basename(file_path)
-            
+            # file_name = file_path.split('\\')[-1] # os.path.basename(file_path)
+            file_name = "download file"
+            st.markdown(f"<p>file_path : {file_path}</a>", unsafe_allow_html=True)
+            st.markdown(f"<p>file_name : {file_name}</a>", unsafe_allow_html=True)
             st.success("오디오 파일이 다운로드되었습니다.")
             # 파일을 다운로드할 수 있는 링크 제공
             with open(file_path, "rb") as file:
@@ -76,7 +78,6 @@ if audio_file is not None:
         temp_file.write(audio_file.read())
         temp_file_path = temp_file.name
 
-    print('temp_file_path:', temp_file_path)
     st.audio(temp_file_path, format="audio/wav")
     transcription = transcribe_audio(temp_file_path)
     st.subheader("Transcription")
